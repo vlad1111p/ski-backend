@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: ski_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: skitrainerdb
+      POSTGRES_USER: skiuser
+      POSTGRES_PASSWORD: skipassword
+
+    ports:
+      - "5432:5432"
+    volumes:
+      - ski_pg_data:/var/lib/postgresql/data
+    networks:
+      - ski-network
+
+volumes:
+  ski_pg_data:
+
+networks:
+  ski-network:
