@@ -3,7 +3,7 @@ package com.skitrainer.controller;
 import com.skitrainer.dto.auth.LoginRequest;
 import com.skitrainer.dto.auth.OAuthLoginRequest;
 import com.skitrainer.dto.auth.RegisterRequest;
-import com.skitrainer.service.AuthService;
+import com.skitrainer.service.auth.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

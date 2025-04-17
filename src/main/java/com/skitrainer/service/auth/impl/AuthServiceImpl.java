@@ -1,4 +1,4 @@
-package com.skitrainer.service.impl;
+package com.skitrainer.service.auth.impl;
 
 import com.skitrainer.dto.auth.AuthResponse;
 import com.skitrainer.dto.auth.LoginRequest;
@@ -6,10 +6,13 @@ import com.skitrainer.dto.auth.OAuthLoginRequest;
 import com.skitrainer.dto.auth.RegisterRequest;
 import com.skitrainer.model.User;
 import com.skitrainer.repository.UserRepository;
-import com.skitrainer.service.AuthService;
+import com.skitrainer.service.auth.AuthService;
+import com.skitrainer.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +25,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse register(final RegisterRequest request) {
         if (userRepository.existsByEmail(request.email())) {
-            throw new RuntimeException("Email already in use");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already in use");
         }
         final User user = User.builder()
                 .email(request.email())
@@ -39,10 +42,10 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse login(final LoginRequest request) {
         final User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials"));
 
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
         }
 
         final String token = jwtUtil.generateToken(user);
@@ -53,6 +56,6 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse oauthLogin(final OAuthLoginRequest request) {
         // TODO: Google token validation logic (can be added next)
-        throw new UnsupportedOperationException("OAuth login not implemented yet");
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "OAuth login not implemented yet");
     }
 }

@@ -1,4 +1,4 @@
-package com.skitrainer.service;
+package com.skitrainer.service.auth;
 
 import com.skitrainer.dto.auth.AuthResponse;
 import com.skitrainer.dto.auth.LoginRequest;
