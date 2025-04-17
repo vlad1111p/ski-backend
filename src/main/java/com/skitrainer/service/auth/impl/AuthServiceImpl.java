@@ -56,6 +56,6 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse oauthLogin(final OAuthLoginRequest request) {
         // TODO: Google token validation logic (can be added next)
-        throw new UnsupportedOperationException("OAuth login not implemented yet");
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "OAuth login not implemented yet");
     }
 }
