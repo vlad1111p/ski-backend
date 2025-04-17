@@ -1,6 +1,7 @@
 package com.skitrainer.security;
 
 import com.skitrainer.model.CustomUserDetails;
+import com.skitrainer.model.User;
 import com.skitrainer.service.auth.impl.CustomUserDetailsService;
 import com.skitrainer.util.JwtUtil;
 import jakarta.servlet.FilterChain;
@@ -26,7 +27,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService userDetailsService;
 
-
     @Override
     protected void doFilterInternal(
             final HttpServletRequest request,
@@ -46,7 +46,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             final UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-            if (jwtUtil.isTokenValid(token, ((CustomUserDetails) userDetails).user())) {
+            if (userDetails instanceof CustomUserDetails(User user) && jwtUtil.isTokenValid(token, user)) {
                 final UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails,
@@ -58,8 +58,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
-        }
 
+        }
         filterChain.doFilter(request, response);
     }
 }
