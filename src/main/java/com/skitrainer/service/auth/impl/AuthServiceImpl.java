@@ -1,4 +1,4 @@
-package com.skitrainer.service.impl;
+package com.skitrainer.service.auth.impl;
 
 import com.skitrainer.dto.auth.AuthResponse;
 import com.skitrainer.dto.auth.LoginRequest;
@@ -6,7 +6,8 @@ import com.skitrainer.dto.auth.OAuthLoginRequest;
 import com.skitrainer.dto.auth.RegisterRequest;
 import com.skitrainer.model.User;
 import com.skitrainer.repository.UserRepository;
-import com.skitrainer.service.AuthService;
+import com.skitrainer.service.auth.AuthService;
+import com.skitrainer.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
