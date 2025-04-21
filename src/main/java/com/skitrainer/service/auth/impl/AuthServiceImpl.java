@@ -2,7 +2,6 @@ package com.skitrainer.service.auth.impl;
 
 import com.skitrainer.dto.auth.AuthResponse;
 import com.skitrainer.dto.auth.LoginRequest;
-import com.skitrainer.dto.auth.OAuthLoginRequest;
 import com.skitrainer.dto.auth.RegisterRequest;
 import com.skitrainer.model.User;
 import com.skitrainer.repository.UserRepository;
@@ -51,11 +50,5 @@ public class AuthServiceImpl implements AuthService {
         final String token = jwtUtil.generateToken(user);
 
         return new AuthResponse(token, user.getName(), user.getRole().name());
-    }
-
-    @Override
-    public AuthResponse oauthLogin(final OAuthLoginRequest request) {
-        // TODO: Google token validation logic (can be added next)
-        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "OAuth login not implemented yet");
     }
 }
