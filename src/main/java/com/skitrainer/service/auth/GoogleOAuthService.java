@@ -1,9 +1,9 @@
 package com.skitrainer.service.auth;
 
-import java.util.Map;
+import com.skitrainer.dto.auth.OAuthLoginResponse;
 
 public interface GoogleOAuthService {
-    Map<String, Object> exchangeCodeForTokens(String code);
+    OAuthLoginResponse exchangeCodeForTokens(String code);
 
     String buildGoogleAuthorizationUrl();
 }
