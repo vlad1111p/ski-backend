@@ -2,15 +2,19 @@ package com.skitrainer.controller;
 
 import com.skitrainer.dto.auth.LoginRequest;
 import com.skitrainer.dto.auth.RegisterRequest;
+import com.skitrainer.dto.auth.SetPasswordRequest;
+import com.skitrainer.model.User;
 import com.skitrainer.service.auth.AuthService;
 import com.skitrainer.service.auth.GoogleOAuthService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -29,6 +33,13 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody final LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PostMapping("/set-password")
+    public ResponseEntity<?> setPassword(@AuthenticationPrincipal User user,
+                                         @Valid @RequestBody SetPasswordRequest request) {
+        authService.setPassword(user, request);
+        return ResponseEntity.ok(Map.of("message", "Password set successfully"));
     }
 
     @GetMapping("/google-authorize")

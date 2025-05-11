@@ -10,15 +10,15 @@ import com.skitrainer.model.User;
 import com.skitrainer.repository.UserRepository;
 import com.skitrainer.service.auth.GoogleOAuthService;
 import com.skitrainer.util.JwtUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 
+@Slf4j
 @Service
 public class GoogleOAuthServiceImpl implements GoogleOAuthService {
 
@@ -50,13 +50,17 @@ public class GoogleOAuthServiceImpl implements GoogleOAuthService {
                 .queryParam("client_id", clientId)
                 .queryParam("redirect_uri", redirectUri)
                 .queryParam("response_type", "code")
-                .queryParam("scope", "https://www.googleapis.com/auth/calendar")
-                .queryParam("access_type", "offline")
+                .queryParam("scope", String.join(" ",
+                        "https://www.googleapis.com/auth/userinfo.email",
+                        "https://www.googleapis.com/auth/userinfo.profile",
+                        "https://www.googleapis.com/auth/calendar"
+                )).queryParam("access_type", "offline")
                 .queryParam("prompt", "consent")
                 .build()
                 .toUriString();
     }
 
+    //TODO: add refresh token
     @Override
     public OAuthLoginResponse exchangeCodeForTokens(final String code) {
         try {
@@ -74,7 +78,8 @@ public class GoogleOAuthServiceImpl implements GoogleOAuthService {
             final String refreshToken = tokenResponse.getRefreshToken();
 
             if (accessToken == null) {
-                throw new RuntimeException("Access token not received from Google");
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                        "Access token not received from Google");
             }
 
             final GoogleUserInfo userInfo = fetchGoogleUserInfo(accessToken);
@@ -97,7 +102,10 @@ public class GoogleOAuthServiceImpl implements GoogleOAuthService {
                     user.getRole().name());
 
         } catch (Exception e) {
-            throw new RuntimeException("Failed to authenticate with Google", e);
+            log.error("Error exchanging code for tokens: {}", e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Failed to authenticate with Google",
+                    e);
         }
     }
 
@@ -118,7 +126,8 @@ public class GoogleOAuthServiceImpl implements GoogleOAuthService {
 
         final GoogleUserInfo userInfo = response.getBody();
         if (userInfo == null || userInfo.email() == null) {
-            throw new RuntimeException("Failed to fetch user info from Google");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Failed to fetch user info from Google");
         }
 
         return userInfo;
