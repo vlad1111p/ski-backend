@@ -102,7 +102,6 @@ public class GoogleOAuthServiceImpl implements GoogleOAuthService {
                     user.getRole().name());
 
         } catch (Exception e) {
-            log.error("Error exchanging code for tokens: {}", e.getMessage(), e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "Failed to authenticate with Google",
                     e);
