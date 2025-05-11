@@ -22,15 +22,15 @@ public abstract class BaseLoggingAspect {
 
     @AfterReturning(pointcut = "getPointcut()", returning = "result")
     public void logAfterReturning(final JoinPoint joinPoint, final Object result) {
-
         boolean isVoid = ((MethodSignature) joinPoint.getSignature()).getReturnType().equals(Void.TYPE);
-
         if (isVoid) {
-            log.info("[{}] Exiting method: {}",
+            log.info("[{}] [{}] Exiting method: {}",
+                    Thread.currentThread().getName(),
                     getLayerName(),
                     joinPoint.getSignature().toShortString());
         } else {
-            log.info("[{}] Exiting method: {} with result: {}",
+            log.info("[{}] [{}] Exiting method: {} with result: {}",
+                    Thread.currentThread().getName(),
                     getLayerName(),
                     joinPoint.getSignature().toShortString(),
                     result);
@@ -39,7 +39,8 @@ public abstract class BaseLoggingAspect {
 
     @AfterThrowing(pointcut = "getPointcut()", throwing = "exception")
     public void logAfterThrowing(final JoinPoint joinPoint, final Throwable exception) {
-        log.error("[{}] Exception in method: {} with message: {}",
+        log.error("[{}] [{}] Exception in method: {} with message: {}",
+                Thread.currentThread().getName(),
                 getLayerName(),
                 joinPoint.getSignature().toShortString(),
                 exception.getMessage(), exception);
