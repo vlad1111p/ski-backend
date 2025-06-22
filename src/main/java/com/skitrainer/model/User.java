@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
+
 @Entity
 @Table(name = "app_user")
 @Data
@@ -27,8 +29,12 @@ public class User {
 
     private String password;
 
+    @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private Set<Role> roles;
+
+    @Transient
+    private Role activeRole;
 
     @Column(length = 512)
     private String refreshToken;
@@ -37,7 +43,4 @@ public class User {
         return password != null && !password.isBlank();
     }
 
-    public enum Role {
-        TRAINER, PARTICIPANT
-    }
 }
