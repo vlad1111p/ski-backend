@@ -18,6 +18,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import static com.skitrainer.model.User.Role.PARTICIPANT;
+
 @Slf4j
 @Service
 public class GoogleOAuthServiceImpl implements GoogleOAuthService {
@@ -89,7 +91,8 @@ public class GoogleOAuthServiceImpl implements GoogleOAuthService {
                             User.builder()
                                     .email(userInfo.email())
                                     .name(userInfo.name())
-                                    .role(User.Role.PARTICIPANT)
+                                    .googleId(userInfo.id())
+                                    .role(PARTICIPANT)
                                     // Optional: store refreshToken/accessToken here
                                     .build()
                     ));
@@ -108,7 +111,7 @@ public class GoogleOAuthServiceImpl implements GoogleOAuthService {
         }
     }
 
-    //switch to Google People API to get user more info including profile picture, phone number, etc.
+    //TODO switch to Google People API to get user more info including profile picture, phone number, etc.
     private GoogleUserInfo fetchGoogleUserInfo(final String accessToken) {
         final HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);

@@ -14,6 +14,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 @RestController
@@ -48,7 +50,11 @@ public class AuthController {
     }
 
     @GetMapping("/google-callback")
-    public ResponseEntity<?> handleGoogleCallback(@RequestParam final String code) {
-        return ResponseEntity.ok(googleOAuthService.exchangeCodeForTokens(code));
+    public void handleGoogleCallback(
+            @RequestParam("code") String code,
+            HttpServletResponse response
+    ) throws IOException {
+        String token = googleOAuthService.exchangeCodeForTokens(code).token();
+        response.sendRedirect("http://localhost:3000/dashboard?token=" + URLEncoder.encode(token, StandardCharsets.UTF_8));
     }
 }
