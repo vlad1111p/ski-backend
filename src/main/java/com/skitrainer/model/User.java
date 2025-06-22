@@ -30,6 +30,13 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Column(length = 512)
+    private String refreshToken;
+
+    public boolean canLoginLocally() {
+        return password != null && !password.isBlank();
+    }
+
     public enum Role {
         TRAINER, PARTICIPANT
     }

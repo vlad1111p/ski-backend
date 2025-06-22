@@ -5,11 +5,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
+@Table(name = "event")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,14 +23,18 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String title;
 
     private String description;
 
+    @Column(nullable = false)
     private String location;
 
+    @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
 
+    @Column(name = "end_time", nullable = false)
     private LocalDateTime endTime;
 
     @ManyToMany
@@ -47,7 +54,19 @@ public class Event {
     private Set<User> participants;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Status status;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    private String googleEventId;
+    private boolean isSyncedWithGoogle;
 
     public enum Status {
         PENDING, ACCEPTED, CANCELLED
