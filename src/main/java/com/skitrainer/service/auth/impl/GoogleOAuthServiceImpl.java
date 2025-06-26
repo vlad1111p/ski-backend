@@ -5,7 +5,6 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.skitrainer.dto.auth.GoogleUserInfo;
-import com.skitrainer.dto.auth.OAuthLoginResponse;
 import com.skitrainer.model.User;
 import com.skitrainer.repository.UserRepository;
 import com.skitrainer.service.auth.GoogleOAuthService;
@@ -64,7 +63,7 @@ public class GoogleOAuthServiceImpl implements GoogleOAuthService {
 
     //TODO: add refresh token
     @Override
-    public OAuthLoginResponse exchangeCodeForTokens(final String code) {
+    public String exchangeCodeForTokens(final String code) {
         try {
             final GoogleTokenResponse tokenResponse = new GoogleAuthorizationCodeTokenRequest(
                     new NetHttpTransport(),
@@ -97,12 +96,7 @@ public class GoogleOAuthServiceImpl implements GoogleOAuthService {
                                     .build()
                     ));
 
-            final String jwt = jwtUtil.generateToken(user);
-
-            return new OAuthLoginResponse(
-                    jwt,
-                    user.getName(),
-                    user.getRole().name());
+            return jwtUtil.generateToken(user);
 
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
