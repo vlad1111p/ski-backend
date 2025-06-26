@@ -5,7 +5,6 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.skitrainer.dto.auth.GoogleUserInfo;
-import com.skitrainer.dto.auth.OAuthLoginResponse;
 import com.skitrainer.model.User;
 import com.skitrainer.repository.UserRepository;
 import com.skitrainer.service.auth.GoogleOAuthService;
@@ -17,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import static com.skitrainer.model.User.Role.PARTICIPANT;
 
 @Slf4j
 @Service
@@ -62,7 +63,7 @@ public class GoogleOAuthServiceImpl implements GoogleOAuthService {
 
     //TODO: add refresh token
     @Override
-    public OAuthLoginResponse exchangeCodeForTokens(final String code) {
+    public String exchangeCodeForTokens(final String code) {
         try {
             final GoogleTokenResponse tokenResponse = new GoogleAuthorizationCodeTokenRequest(
                     new NetHttpTransport(),
@@ -89,17 +90,13 @@ public class GoogleOAuthServiceImpl implements GoogleOAuthService {
                             User.builder()
                                     .email(userInfo.email())
                                     .name(userInfo.name())
-                                    .role(User.Role.PARTICIPANT)
+                                    .googleId(userInfo.id())
+                                    .role(PARTICIPANT)
                                     // Optional: store refreshToken/accessToken here
                                     .build()
                     ));
 
-            final String jwt = jwtUtil.generateToken(user);
-
-            return new OAuthLoginResponse(
-                    jwt,
-                    user.getName(),
-                    user.getRole().name());
+            return jwtUtil.generateToken(user);
 
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
@@ -108,7 +105,7 @@ public class GoogleOAuthServiceImpl implements GoogleOAuthService {
         }
     }
 
-    //switch to Google People API to get user more info including profile picture, phone number, etc.
+    //TODO switch to Google People API to get user more info including profile picture, phone number, etc.
     private GoogleUserInfo fetchGoogleUserInfo(final String accessToken) {
         final HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);

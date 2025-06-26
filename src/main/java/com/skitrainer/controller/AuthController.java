@@ -14,6 +14,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 @RestController
@@ -36,8 +38,8 @@ public class AuthController {
     }
 
     @PostMapping("/set-password")
-    public ResponseEntity<?> setPassword(@AuthenticationPrincipal User user,
-                                         @Valid @RequestBody SetPasswordRequest request) {
+    public ResponseEntity<?> setPassword(@AuthenticationPrincipal final User user,
+                                         @Valid @RequestBody final SetPasswordRequest request) {
         authService.setPassword(user, request);
         return ResponseEntity.ok(Map.of("message", "Password set successfully"));
     }
@@ -48,7 +50,11 @@ public class AuthController {
     }
 
     @GetMapping("/google-callback")
-    public ResponseEntity<?> handleGoogleCallback(@RequestParam final String code) {
-        return ResponseEntity.ok(googleOAuthService.exchangeCodeForTokens(code));
+    public void handleGoogleCallback(
+            @RequestParam("code") final String code,
+            final HttpServletResponse response
+    ) throws IOException {
+        final String token = googleOAuthService.exchangeCodeForTokens(code);
+        response.sendRedirect("http://localhost:3000/dashboard?token=" + URLEncoder.encode(token, StandardCharsets.UTF_8));
     }
 }

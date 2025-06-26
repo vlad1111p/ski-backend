@@ -12,6 +12,8 @@ public abstract class BaseLoggingAspect {
 
     protected abstract String getLayerName();
 
+    protected abstract String getPointcut();
+
     @Before("getPointcut()")
     public void logBefore(final JoinPoint joinPoint) {
         log.info("[{}] Entering method: {} with arguments: {}",
@@ -45,6 +47,4 @@ public abstract class BaseLoggingAspect {
                 joinPoint.getSignature().toShortString(),
                 exception.getMessage(), exception);
     }
-
-    protected abstract String getPointcut();
 }
