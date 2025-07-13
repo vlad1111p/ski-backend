@@ -36,12 +36,14 @@ public class User {
 
     @Column(unique = true)
     private String googleId;
-    
+
     @Column(length = 2048)
     private String googleAccessToken;
 
     @Column(length = 2048)
     private String googleRefreshToken;
+
+    private String googlePictureUrl;
 
     private Instant tokenExpiry;
 

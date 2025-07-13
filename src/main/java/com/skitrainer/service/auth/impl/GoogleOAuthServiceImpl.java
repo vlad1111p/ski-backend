@@ -48,6 +48,31 @@ public class GoogleOAuthServiceImpl implements GoogleOAuthService {
         this.jwtUtil = jwtUtil;
     }
 
+    private static void updateFromGoogle(final User user,
+                                         final GoogleUserInfo userInfo,
+                                         final String accessToken,
+                                         final String refreshToken,
+                                         final long expiresInSeconds) {
+        user.setEmail(userInfo.email());
+        user.setFullName(userInfo.name());
+        user.setGoogleAuthenticated(true);
+        user.setGoogleAccessToken(accessToken);
+        user.setGoogleRefreshToken(refreshToken);
+        user.setTokenExpiry(Instant.now().plusSeconds(expiresInSeconds));
+        user.setGooglePictureUrl(userInfo.picture());
+
+        if (userInfo.id() != null) {
+            user.setGoogleId(userInfo.id());
+        }
+
+        if (user.getRole() == null) {
+            user.setRole(User.Role.PARTICIPANT);
+        }
+        if (user.getId() == null) {
+            user.setId(UUID.randomUUID().toString());
+        }
+    }
+
     /**
      * Builds the Google authorization URL for OAuth 2.0 authentication.
      *
@@ -93,50 +118,17 @@ public class GoogleOAuthServiceImpl implements GoogleOAuthService {
             final String refreshToken = tokenResponse.getRefreshToken();
             final long expiresInSeconds = tokenResponse.getExpiresInSeconds();
 
-            if (accessToken == null) {
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Access token not received from Google");
-            }
-
-            final GoogleUserInfo userInfo = fetchGoogleUserInfo(accessToken);
+            final GoogleUserInfo userInfo = googleUserInfoClient.getUserInfo("Bearer " + accessToken);
 
             final User user = userRepository.findByEmail(userInfo.email())
                     .orElse(new User());
 
-            user.setEmail(userInfo.email());
-            user.setFullName(userInfo.name());
-            user.setGoogleAuthenticated(true);
-            user.setGoogleAccessToken(accessToken);
-            user.setGoogleRefreshToken(refreshToken);
-            user.setTokenExpiry(Instant.now().plusSeconds(expiresInSeconds));
-
-            if (userInfo.id() != null) {
-                user.setGoogleId(userInfo.id());
-            }
-
-            if (user.getRole() == null) {
-                user.setRole(User.Role.PARTICIPANT);
-            }
-            if (user.getId() == null) {
-                user.setId(UUID.randomUUID().toString());
-            }
+            updateFromGoogle(user, userInfo, accessToken, refreshToken, expiresInSeconds);
 
             return jwtUtil.generateToken(userRepository.save(user));
 
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to authenticate with Google", e);
         }
-    }
-
-    //TODO switch to Google People API to get user more info including profile picture, phone number, etc.
-    private GoogleUserInfo fetchGoogleUserInfo(final String accessToken) {
-
-        final GoogleUserInfo userInfo = googleUserInfoClient.getUserInfo("Bearer " + accessToken);
-
-        if (userInfo == null || userInfo.email() == null) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Failed to fetch user info from Google");
-        }
-
-        return userInfo;
     }
 }
