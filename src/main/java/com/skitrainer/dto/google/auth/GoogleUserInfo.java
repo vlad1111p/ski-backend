@@ -1,4 +1,4 @@
-package com.skitrainer.dto.auth;
+package com.skitrainer.dto.google.auth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

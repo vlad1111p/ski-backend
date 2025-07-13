@@ -6,6 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
+import java.util.UUID;
+
 @Entity
 @Table(name = "app_user")
 @Data
@@ -15,30 +18,35 @@ import lombok.NoArgsConstructor;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id = UUID.randomUUID().toString();
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false, unique = true)
     private String email;
 
-    private String name;
-
-    private String googleId;
-
     private String password;
+
+    private String fullName;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
 
-    @Column(length = 512)
-    private String refreshToken;
+    @Column(nullable = false)
+    private boolean googleAuthenticated = false;
 
-    public boolean canLoginLocally() {
-        return password != null && !password.isBlank();
-    }
+    @Column(unique = true)
+    private String googleId;
+    
+    @Column(length = 2048)
+    private String googleAccessToken;
+
+    @Column(length = 2048)
+    private String googleRefreshToken;
+
+    private Instant tokenExpiry;
 
     public enum Role {
-        TRAINER, PARTICIPANT
+        TRAINER,
+        PARTICIPANT
     }
 }

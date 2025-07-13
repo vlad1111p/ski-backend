@@ -22,6 +22,17 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
+    private static boolean isValidPassword(User user) {
+        return user.getPassword() != null && !user.getPassword().isBlank();
+    }
+
+    /**
+     * Registers a new user with the provided details.
+     *
+     * @param request the registration request containing email, password, name, and role
+     * @return an AuthResponse containing the JWT token, user's name, and role
+     * @throws ResponseStatusException if the email is already in use or if the role is invalid
+     */
     @Override
     public AuthResponse register(final RegisterRequest request) {
         if (userRepository.existsByEmail(request.email())) {
@@ -32,15 +43,22 @@ public class AuthServiceImpl implements AuthService {
         final User user = User.builder()
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
-                .name(request.name())
+                .fullName(request.name())
                 .role(User.Role.valueOf(request.role().toUpperCase()))
                 .build();
         final User savedUser = userRepository.save(user);
         final String token = jwtUtil.generateToken(savedUser);
 
-        return new AuthResponse(token, savedUser.getName(), savedUser.getRole().name());
+        return new AuthResponse(token, savedUser.getFullName(), savedUser.getRole().name());
     }
 
+    /**
+     * Logs in a user with the provided credentials.
+     *
+     * @param request the login request containing email and password
+     * @return an AuthResponse containing the JWT token, user's name, and role
+     * @throws ResponseStatusException if the credentials are invalid or the user cannot log in locally
+     */
     @Override
     public AuthResponse login(final LoginRequest request) {
         final User user = userRepository.findByEmail(request.email())
@@ -50,16 +68,23 @@ public class AuthServiceImpl implements AuthService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
         }
 
-        if (!user.canLoginLocally()) {
+        if (!isValidPassword(user)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
                     "User cannot login locally. Please use Google login.");
         }
 
         final String token = jwtUtil.generateToken(user);
 
-        return new AuthResponse(token, user.getName(), user.getRole().name());
+        return new AuthResponse(token, user.getFullName(), user.getRole().name());
     }
 
+    /**
+     * Sets the password for a user.
+     *
+     * @param user               the user for whom the password is being set
+     * @param setPasswordRequest the request containing the new password
+     * @throws ResponseStatusException if the user already has a password set
+     */
     @Override
     public void setPassword(final User user, final SetPasswordRequest setPasswordRequest) {
         if (user.getPassword() != null && !user.getPassword().isBlank()) {

@@ -55,6 +55,6 @@ public class AuthController {
             final HttpServletResponse response
     ) throws IOException {
         final String token = googleOAuthService.exchangeCodeForTokens(code);
-        response.sendRedirect("http://localhost:3000/dashboard?token=" + URLEncoder.encode(token, StandardCharsets.UTF_8));
+        response.sendRedirect("http://localhost:3000/auth/callback?token=" + URLEncoder.encode(token, StandardCharsets.UTF_8));
     }
 }

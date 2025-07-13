@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -20,8 +21,7 @@ import java.util.Set;
 public class Event {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
     @Column(nullable = false)
     private String title;
@@ -65,8 +65,10 @@ public class Event {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(unique = true)
     private String googleEventId;
-    private boolean isSyncedWithGoogle;
+
+    private Instant googleSyncTimestamp;
 
     public enum Status {
         PENDING, ACCEPTED, CANCELLED
