@@ -9,5 +9,8 @@ public interface CalendarService {
 
     Event createEvent(String userId, Event event);
 
+    Event updateEvent(String userId, String eventId, Event updatedEvent);
+
     void deleteEvent(String userId, String eventId);
+
 }

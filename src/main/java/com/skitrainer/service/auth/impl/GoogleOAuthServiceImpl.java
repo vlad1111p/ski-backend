@@ -33,7 +33,8 @@ public class GoogleOAuthServiceImpl implements GoogleOAuthService {
     private final String redirectUri;
 
     public GoogleOAuthServiceImpl(
-            final UserRepository userRepository, GoogleUserInfoClient googleUserInfoClient,
+            final UserRepository userRepository,
+            final GoogleUserInfoClient googleUserInfoClient,
             final JwtUtil jwtUtil,
             @Value("${google.oauth.client-id}") final String clientId,
             @Value("${google.oauth.client-secret}") final String clientSecret,

@@ -23,6 +23,13 @@ public interface GoogleCalendarClient {
             @RequestBody GoogleEventPayload event
     );
 
+    @PatchMapping("/calendars/primary/events/{eventId}")
+    GoogleEventResponse updateEvent(
+            @RequestHeader("Authorization") String bearerToken,
+            @PathVariable("eventId") String eventId,
+            @RequestBody GoogleEventPayload event
+    );
+
     @DeleteMapping("/calendars/primary/events/{eventId}")
     void deleteEvent(
             @RequestHeader("Authorization") String bearerToken,
