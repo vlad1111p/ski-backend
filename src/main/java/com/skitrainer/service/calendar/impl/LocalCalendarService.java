@@ -15,18 +15,18 @@ public class LocalCalendarService implements CalendarService {
     private final EventRepository eventRepository;
 
     @Override
-    public List<Event> getEvents(String userId) {
+    public List<Event> getEvents(final String userId) {
         return eventRepository.findByUserInvolved(userId);
     }
 
     @Override
-    public Event createEvent(String userId, Event event) {
+    public Event createEvent(final String userId, final Event event) {
         return eventRepository.save(event);
     }
 
     @Override
-    public Event updateEvent(String userId, String eventId, Event updatedEvent) {
-        Event existing = eventRepository.findById(eventId)
+    public Event updateEvent(final String userId, final String eventId, final Event updatedEvent) {
+        final Event existing = eventRepository.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Event not found"));
 
         existing.setTitle(updatedEvent.getTitle());
@@ -42,7 +42,7 @@ public class LocalCalendarService implements CalendarService {
     }
 
     @Override
-    public void deleteEvent(String userId, String eventId) {
+    public void deleteEvent(final String userId, final String eventId) {
         eventRepository.deleteById(eventId);
     }
 }
