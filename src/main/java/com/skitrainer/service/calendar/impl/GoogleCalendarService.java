@@ -48,6 +48,7 @@ public class GoogleCalendarService implements CalendarService {
         return event;
     }
 
+
     @Override
     public Event updateEvent(final String userId, final String eventId, final Event updatedEvent) {
         final User user = userRepository.findByEmail(userId).orElseThrow();

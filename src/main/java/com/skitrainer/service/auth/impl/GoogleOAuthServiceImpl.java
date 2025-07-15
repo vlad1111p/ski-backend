@@ -1,6 +1,7 @@
 package com.skitrainer.service.auth.impl;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
+import com.google.api.client.googleapis.auth.oauth2.GoogleRefreshTokenRequest;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -51,15 +53,13 @@ public class GoogleOAuthServiceImpl implements GoogleOAuthService {
 
     private static void updateFromGoogle(final User user,
                                          final GoogleUserInfo userInfo,
-                                         final String accessToken,
-                                         final String refreshToken,
-                                         final long expiresInSeconds) {
+                                         final GoogleTokenResponse googleTokenResponse) {
         user.setEmail(userInfo.email());
         user.setFullName(userInfo.name());
         user.setGoogleAuthenticated(true);
-        user.setGoogleAccessToken(accessToken);
-        user.setGoogleRefreshToken(refreshToken);
-        user.setTokenExpiry(Instant.now().plusSeconds(expiresInSeconds));
+        user.setGoogleAccessToken(googleTokenResponse.getAccessToken());
+        user.setGoogleRefreshToken(googleTokenResponse.getRefreshToken());
+        user.setTokenExpiry(Instant.now().plusSeconds(googleTokenResponse.getExpiresInSeconds()));
         user.setGooglePictureUrl(userInfo.picture());
 
         if (userInfo.id() != null) {
@@ -115,21 +115,44 @@ public class GoogleOAuthServiceImpl implements GoogleOAuthService {
                     redirectUri
             ).execute();
 
-            final String accessToken = tokenResponse.getAccessToken();
-            final String refreshToken = tokenResponse.getRefreshToken();
-            final long expiresInSeconds = tokenResponse.getExpiresInSeconds();
 
-            final GoogleUserInfo userInfo = googleUserInfoClient.getUserInfo("Bearer " + accessToken);
+            final String bearerToken = "Bearer " + tokenResponse.getAccessToken();
+            final GoogleUserInfo userInfo = googleUserInfoClient.getUserInfo(bearerToken);
 
             final User user = userRepository.findByEmail(userInfo.email())
                     .orElse(new User());
 
-            updateFromGoogle(user, userInfo, accessToken, refreshToken, expiresInSeconds);
+            updateFromGoogle(user, userInfo, tokenResponse);
 
             return jwtUtil.generateToken(userRepository.save(user));
 
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to authenticate with Google", e);
+        }
+    }
+
+    /**
+     * Refreshes the access token for a user using their refresh token.
+     *
+     * @param user the user whose access token is to be refreshed
+     * @throws ResponseStatusException if there is an error during the token refresh
+     */
+    @Override
+    public void refreshAccessToken(final User user) {
+        try {
+            final GoogleTokenResponse response = new GoogleRefreshTokenRequest(
+                    new NetHttpTransport(),
+                    GsonFactory.getDefaultInstance(),
+                    user.getGoogleRefreshToken(),
+                    clientId,
+                    clientSecret
+            ).execute();
+
+            user.setGoogleAccessToken(response.getAccessToken());
+            user.setTokenExpiry(Instant.now().plusSeconds(response.getExpiresInSeconds()));
+            userRepository.save(user);
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Failed to refresh access token", e);
         }
     }
 }
