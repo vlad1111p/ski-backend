@@ -40,7 +40,7 @@ public class GoogleCalendarService implements CalendarService {
         final User user = userRepository.findByEmail(userId).orElseThrow();
         final String bearer = "Bearer " + user.getGoogleAccessToken();
 
-        final GoogleEventPayload payload = GoogleEventPayload.fromLocalEvent(event);
+        final GoogleEventPayload payload = googleEventMapper.toGooglePayload(event);
         final GoogleEventResponse response = googleCalendarClient.createEvent(bearer, payload);
 
         event.setGoogleEventId(response.id());
@@ -53,7 +53,7 @@ public class GoogleCalendarService implements CalendarService {
         final User user = userRepository.findByEmail(userId).orElseThrow();
         final String bearer = "Bearer " + user.getGoogleAccessToken();
 
-        final GoogleEventPayload payload = GoogleEventPayload.fromLocalEvent(updatedEvent);
+        final GoogleEventPayload payload = googleEventMapper.toGooglePayload(updatedEvent);
         final GoogleEventResponse response = googleCalendarClient.updateEvent(bearer, eventId, payload);
 
         updatedEvent.setGoogleEventId(response.id());
