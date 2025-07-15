@@ -14,8 +14,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.UUID;
-
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -43,7 +41,6 @@ public class AuthServiceImpl implements AuthService {
 
         //TODO validate role so that there is only given roles
         final User user = User.builder()
-                .id(UUID.randomUUID().toString())
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
                 .fullName(request.name())

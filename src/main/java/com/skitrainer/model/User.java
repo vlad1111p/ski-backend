@@ -18,34 +18,31 @@ import java.util.UUID;
 public class User {
 
     @Id
-    private String id = UUID.randomUUID().toString();
-
+    private String id;
     @Column(nullable = false, unique = true)
     private String email;
-
     private String password;
-
     private String fullName;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
-
     @Column(nullable = false)
     private boolean googleAuthenticated = false;
-
     @Column(unique = true)
     private String googleId;
-
     @Column(length = 2048)
     private String googleAccessToken;
-
     @Column(length = 2048)
     private String googleRefreshToken;
-
     private String googlePictureUrl;
-
     private Instant tokenExpiry;
+
+    @PrePersist
+    public void assignId() {
+        if (this.id == null) {
+            this.id = UUID.randomUUID().toString();
+        }
+    }
 
     public enum Role {
         TRAINER,
